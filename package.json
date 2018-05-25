@@ -1,0 +1,58 @@
+{
+  "_from": "@BachirKhiati/rn-cropper",
+  "_id": "@BachirKhiati/rn-cropper@1.0.0",
+  "_inBundle": false,
+  "_integrity": "sha1-eAcnEHLjD74b4IRyKdyENsivc8o=",
+  "_location": "/@BachirKhiati/rn-cropper",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "@BachirKhiati/rn-cropper",
+    "name": "@BachirKhiati/rn-cropper",
+    "escapedName": "@BachirKhiati%2freact-native-image-crop",
+    "scope": "@BachirKhiati",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/@BachirKhiati/rn-cropper/-/react-native-image-crop-1.0.0.tgz",
+  "_shasum": "7807271072e30fbe1be0847229dc8436c8af73ca",
+  "_spec": "@BachirKhiati/rn-cropper",
+  "_where": "/Users/kidday/testapp",
+  "author": {
+    "name": "Bachir:khiati",
+    "email": "bachir.khiati@gmail.com"
+  },
+  "bugs": {
+    "url": "https://github.com/BachirKhiati/rn-cropper/issues"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "A component for react-native crop image, such as edit user head",
+  "homepage": "https://github.com/BachirKhiati/rn-cropper",
+  "keywords": [
+    "react-native",
+    "react-component",
+    "ios",
+    "android",
+    "crop",
+    "image",
+    "BachirKhiati",
+    "mobile"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "@BachirKhiati/rn-cropper",
+  "peerDependencies": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/BachirKhiati/rn-cropper.git"
+  },
+  "version": "1.0.0"
+}
