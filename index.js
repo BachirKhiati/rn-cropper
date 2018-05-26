@@ -1,27 +1,28 @@
-import React from 'react';
+import React from "react";
 import {
   View,
   PanResponder,
   Animated,
   Image,
+  ImageBackground,
   StyleSheet,
-  Dimensions
-} from 'react-native';
+  Dimensions,
+} from "react-native";
 
-const { width } = Dimensions.get( 'window' );
-import ClipRect from './Rect';
+import ClipRect from "./Rect";
+
+const { width } = Dimensions.get("window");
 
 export default class extends React.Component {
-  // constructor(props) {
-  //   super(props)
+  constructor(props) {
+    super(props);
 
-  //   this.state = {
-  //     editRectWidth: 212,
-  //     editRectHeight: 212,
-  //     editRectRadius: 106,
-  //     overlayColor: 'rgba(0, 0, 0, 0.5)',
-  //   }
-  // }
+    this.state = {
+      imageWidth: null,
+      imageHeight: null,
+      loaded: false,
+    };
+  }
 
   static defaultProps = {
     editRectWidth: width,
@@ -29,16 +30,30 @@ export default class extends React.Component {
     editRectRadius: 0,
     width: 1080,
     height: 1080,
-    overlayColor: 'rgba(0, 0, 0, 0.5)'
+    overlayColor: "rgba(0, 0, 0, 0.5)",
   };
   componentWillMount() {
-    const {
-      editRectWidth,
-      editRectHeight,
-      imageWidth,
-      imageHeight
-    } = this.props;
-    // 上次/当前/动画 x 位移
+    const { source } = this.props;
+
+    Image.getSize(source.uri, (width, height) => {
+      this.setState(
+        {
+          imageWidth: width,
+          imageHeight: height,
+        },
+        () => {
+          this.Loaded();
+          this.setState({
+            loaded: true,
+          });
+        }
+      );
+    });
+  }
+
+  Loaded() {
+    const { editRectWidth, editRectHeight } = this.props;
+    const { imageWidth, imageHeight } = this.state;
     this.lastGestureDx = null;
     this.translateX = 0;
     this.animatedTranslateX = new Animated.Value(this.translateX);
@@ -123,9 +138,10 @@ export default class extends React.Component {
         }
       },
       onPanResponderRelease: (evt, gestureState) => {},
-      onPanResponderTerminate: (evt, gestureState) => {}
+      onPanResponderTerminate: (evt, gestureState) => {},
     });
   }
+
   updateTranslate() {
     const { editRectWidth, editRectHeight } = this.props;
     const xOffest = (this.imageMinWidth - editRectWidth / this.scale) / 2;
@@ -147,12 +163,8 @@ export default class extends React.Component {
     this.animatedTranslateY.setValue(this.translateY);
   }
   getCropData() {
-    const {
-      editRectWidth,
-      editRectHeight,
-      imageWidth,
-      imageHeight
-    } = this.props;
+    const { editRectWidth, editRectHeight } = this.props;
+    const { imageWidth, imageHeight } = this.state;
     const ratioX = imageWidth / this.imageMinWidth;
     const ratioY = imageHeight / this.imageMinHeight;
     const width = editRectWidth / this.scale;
@@ -162,22 +174,22 @@ export default class extends React.Component {
     return {
       offset: { x: x * ratioX, y: y * ratioY },
       size: { width: width * ratioX, height: height * ratioY },
-      displaySize: { width: this.props.width, height: this.props.height }
+      displaySize: { width: this.props.width, height: this.props.height },
     };
   }
   render() {
     const animatedStyle = {
       transform: [
         {
-          scale: this.animatedScale
+          scale: this.animatedScale,
         },
         {
-          translateX: this.animatedTranslateX
+          translateX: this.animatedTranslateX,
         },
         {
-          translateY: this.animatedTranslateY
-        }
-      ]
+          translateY: this.animatedTranslateY,
+        },
+      ],
     };
     const {
       editRectWidth,
@@ -185,41 +197,53 @@ export default class extends React.Component {
       editRectRadius,
       source,
       style,
-      overlayColor
+      overlayColor,
     } = this.props;
     return (
-      <View
-        style={[styles.container, style]}
-        {...this.imagePanResponder.panHandlers}
-      >
-        <Animated.View style={animatedStyle}>
-          <Image
-            resizeMode="contain"
-            style={{ width: this.imageMinWidth, height: this.imageMinHeight }}
-            source={source}
-          />
-        </Animated.View>
-        <View style={styles.editboxContainer}>
-          <View style={{ flex: 1, backgroundColor: overlayColor }} />
-          <View style={styles.editboxMiddle}>
-            <View style={{ flex: 1, backgroundColor: overlayColor }} />
-            <View style={{ width: editRectWidth, height: editRectHeight }}>
-              <ClipRect
+      <View>
+        {this.state.loaded && (
+          <View
+            style={[styles.container, style]}
+            {...this.imagePanResponder.panHandlers}
+          >
+            <Animated.View style={animatedStyle}>
+              <ImageBackground
+                resizeMode="contain"
                 style={{
-                  width: editRectWidth,
-                  height: editRectHeight,
-                  borderRadius: editRectRadius,
-                  color: overlayColor
+                  width: this.imageMinWidth,
+                  height: this.imageMinHeight,
                 }}
-              />
-              <View
-                style={[styles.clipRectBoder, { borderRadius: editRectRadius }]}
-              />
+                source={source}
+                        >
+            </ImageBackground>
+            
+            </Animated.View>
+            <View style={styles.editboxContainer}>
+              <View style={{ flex: 1, backgroundColor: overlayColor }} />
+              <View style={styles.editboxMiddle}>
+                <View style={{ flex: 1, backgroundColor: overlayColor }} />
+                <View style={{ width: editRectWidth, height: editRectHeight }}>
+                  <ClipRect
+                    style={{
+                      width: editRectWidth,
+                      height: editRectHeight,
+                      borderRadius: editRectRadius,
+                      color: overlayColor,
+                    }}
+                  />
+                  <View
+                    style={[
+                      styles.clipRectBoder,
+                      { borderRadius: editRectRadius },
+                    ]}
+                  />
+                </View>
+                <View style={{ flex: 1, backgroundColor: overlayColor }} />
+              </View>
+              <View style={{ flex: 1, backgroundColor: overlayColor }} />
             </View>
-            <View style={{ flex: 1, backgroundColor: overlayColor }} />
           </View>
-          <View style={{ flex: 1, backgroundColor: overlayColor }} />
-        </View>
+        )}
       </View>
     );
   }
@@ -228,28 +252,28 @@ export default class extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-    backgroundColor: 'black'
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+    backgroundColor: "black",
   },
   editboxContainer: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0
-  },
-  clipRectBoder: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     right: 0,
     bottom: 0,
     left: 0,
-    borderColor: '#FFFFFF',
-    borderWidth: 2
+  },
+  clipRectBoder: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    borderColor: "#FFFFFF",
+    borderWidth: 2,
   },
   editboxMiddle: {
-    flexDirection: 'row'
-  }
+    flexDirection: "row",
+  },
 });
