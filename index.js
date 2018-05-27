@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   View,
   PanResponder,
@@ -6,53 +6,65 @@ import {
   Image,
   ImageBackground,
   StyleSheet,
-  Dimensions,
-} from "react-native";
+  Dimensions
+} from 'react-native';
 
-import ClipRect from "./Rect";
+import ClipRect from './Rect';
 
-const { width } = Dimensions.get("window");
+const { width } = Dimensions.get('window');
 
 export default class extends React.Component {
   constructor(props) {
     super(props);
-
+    let { width, height } = Dimensions.get('window');
+    console.log('test', width, width);
     this.state = {
       imageWidth: null,
       imageHeight: null,
       loaded: false,
+      editRectWidth: 200,
+      editRectHeight: 200,
+      editRectRadius: 0,
+      width: 1080,
+      height: 1080,
+      overlayColor: 'rgba(0, 0, 0, 0.5)',
+      source: ''
     };
   }
 
-  static defaultProps = {
-    editRectWidth: width,
-    editRectHeight: width,
-    editRectRadius: 0,
-    width: 1080,
-    height: 1080,
-    overlayColor: "rgba(0, 0, 0, 0.5)",
-  };
-  componentWillMount() {
-    const { source } = this.props;
+  matchDimesions(layout) {
+    const { height } = layout;
+    this.setState(
+      {
+        editRectWidth: height,
+        editRectHeight: height
+      },
+      () => {
+        const { source, style } = this.props;
+        console.log('style');
+        console.log(style);
 
-    Image.getSize(source.uri, (width, height) => {
-      this.setState(
-        {
-          imageWidth: width,
-          imageHeight: height,
-        },
-        () => {
-          this.Loaded();
-          this.setState({
-            loaded: true,
-          });
-        }
-      );
-    });
+        Image.getSize(source.uri, (w, h) => {
+          this.setState(
+            {
+              imageWidth: w,
+              imageHeight: h,
+              source: source
+            },
+            () => {
+              this.Loaded();
+              this.setState({
+                loaded: true
+              });
+            }
+          );
+        });
+      }
+    );
   }
 
   Loaded() {
-    const { editRectWidth, editRectHeight } = this.props;
+    const { editRectWidth, editRectHeight } = this.state;
     const { imageWidth, imageHeight } = this.state;
     this.lastGestureDx = null;
     this.translateX = 0;
@@ -64,7 +76,7 @@ export default class extends React.Component {
     this.animatedTranslateY = new Animated.Value(this.translateY);
 
     // 缩放大小
-    this.scale = 1;
+    this.scale = 1.2;
     this.animatedScale = new Animated.Value(this.scale);
     this.lastZoomDistance = null;
     this.currentZoomDistance = 0;
@@ -138,14 +150,15 @@ export default class extends React.Component {
         }
       },
       onPanResponderRelease: (evt, gestureState) => {},
-      onPanResponderTerminate: (evt, gestureState) => {},
+      onPanResponderTerminate: (evt, gestureState) => {}
     });
   }
 
   updateTranslate() {
-    const { editRectWidth, editRectHeight } = this.props;
-    const xOffest = (this.imageMinWidth - editRectWidth / this.scale) / 2;
-    const yOffest = (this.imageMinHeight - editRectHeight / this.scale) / 2;
+    const { editRectWidth, editRectHeight } = this.state;
+    const xOffest = (this.imageMinWidth - editRectWidth / 1.1 / this.scale) / 2;
+    const yOffest =
+      (this.imageMinHeight - editRectHeight / 1.1 / this.scale) / 2;
 
     if (this.translateX > xOffest) {
       this.translateX = xOffest;
@@ -163,33 +176,33 @@ export default class extends React.Component {
     this.animatedTranslateY.setValue(this.translateY);
   }
   getCropData() {
-    const { editRectWidth, editRectHeight } = this.props;
+    const { editRectWidth, editRectHeight } = this.state;
     const { imageWidth, imageHeight } = this.state;
     const ratioX = imageWidth / this.imageMinWidth;
     const ratioY = imageHeight / this.imageMinHeight;
-    const width = editRectWidth / this.scale;
-    const height = editRectHeight / this.scale;
+    const width = editRectWidth / 1.1 / this.scale;
+    const height = editRectHeight / 1.1 / this.scale;
     const x = this.imageMinWidth / 2 - (width / 2 + this.translateX);
     const y = this.imageMinHeight / 2 - (height / 2 + this.translateY);
     return {
       offset: { x: x * ratioX, y: y * ratioY },
       size: { width: width * ratioX, height: height * ratioY },
-      displaySize: { width: this.props.width, height: this.props.height },
+      displaySize: { width: this.state.width, height: this.state.height }
     };
   }
   render() {
     const animatedStyle = {
       transform: [
         {
-          scale: this.animatedScale,
+          scale: this.animatedScale
         },
         {
-          translateX: this.animatedTranslateX,
+          translateX: this.animatedTranslateX
         },
         {
-          translateY: this.animatedTranslateY,
-        },
-      ],
+          translateY: this.animatedTranslateY
+        }
+      ]
     };
     const {
       editRectWidth,
@@ -197,10 +210,14 @@ export default class extends React.Component {
       editRectRadius,
       source,
       style,
-      overlayColor,
-    } = this.props;
+      overlayColor
+    } = this.state;
     return (
-      <View>
+      <View
+        onLayout={event => {
+          this.matchDimesions(event.nativeEvent.layout);
+        }}
+      >
         {this.state.loaded && (
           <View
             style={[styles.container, style]}
@@ -208,33 +225,36 @@ export default class extends React.Component {
           >
             <Animated.View style={animatedStyle}>
               <ImageBackground
-                resizeMode="contain"
+                resizeMode="cover"
                 style={{
                   width: this.imageMinWidth,
-                  height: this.imageMinHeight,
+                  height: this.imageMinHeight
                 }}
                 source={source}
-                        >
-            </ImageBackground>
-            
+              />
             </Animated.View>
             <View style={styles.editboxContainer}>
               <View style={{ flex: 1, backgroundColor: overlayColor }} />
               <View style={styles.editboxMiddle}>
                 <View style={{ flex: 1, backgroundColor: overlayColor }} />
-                <View style={{ width: editRectWidth, height: editRectHeight }}>
+                <View
+                  style={{
+                    width: editRectWidth / 1.1,
+                    height: editRectHeight / 1.1
+                  }}
+                >
                   <ClipRect
                     style={{
                       width: editRectWidth,
                       height: editRectHeight,
                       borderRadius: editRectRadius,
-                      color: overlayColor,
+                      color: overlayColor
                     }}
                   />
                   <View
                     style={[
                       styles.clipRectBoder,
-                      { borderRadius: editRectRadius },
+                      { borderRadius: editRectRadius }
                     ]}
                   />
                 </View>
@@ -252,28 +272,28 @@ export default class extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    overflow: "hidden",
-    backgroundColor: "black",
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+    backgroundColor: 'black'
   },
   editboxContainer: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     right: 0,
     bottom: 0,
-    left: 0,
+    left: 0
   },
   clipRectBoder: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     right: 0,
     bottom: 0,
     left: 0,
-    borderColor: "#FFFFFF",
-    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    borderWidth: 2
   },
   editboxMiddle: {
-    flexDirection: "row",
-  },
+    flexDirection: 'row'
+  }
 });
