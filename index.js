@@ -1,15 +1,6 @@
 import React from 'react';
-import {
-  View,
-  PanResponder,
-  Animated,
-  Image,
-  ImageBackground,
-  StyleSheet
-} from 'react-native';
+import { View, PanResponder, Animated, Image, StyleSheet } from 'react-native';
 import ClipRect from './Rect';
-
-// const { width } = Dimensions.get( 'window' );
 
 export default class extends React.Component {
   constructor(props) {
@@ -164,8 +155,8 @@ export default class extends React.Component {
             if (scale < 1) {
               scale = 1;
             }
-            if (scale > 1.3) {
-              scale = 1.3;
+            if (scale > 1.6) {
+              scale = 1.6;
             }
             this.animatedScale.setValue(scale);
             this.updateTranslate();
@@ -272,16 +263,18 @@ export default class extends React.Component {
             style={[styles.container, style]}
             {...this.imagePanResponder.panHandlers}
           >
-            <Animated.View style={animatedStyle}>
-              <ImageBackground
-                resizeMode="contain"
-                style={{
+            <Animated.Image
+              useNativeDriver
+              style={[
+                animatedStyle,
+                {
                   width: this.imageMinWidth,
                   height: this.imageMinHeight
-                }}
-                source={source}
-              />
-            </Animated.View>
+                }
+              ]}
+              source={source}
+              resizeMode="contain"
+            />
             <View style={styles.editboxContainer}>
               <View style={{ flex: 1, backgroundColor: overlayColor }} />
               <View style={styles.editboxMiddle}>
