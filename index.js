@@ -5,34 +5,31 @@ import {
   Animated,
   Image,
   ImageBackground,
-  StyleSheet,
-  Dimensions
+  StyleSheet
 } from 'react-native';
-
 import ClipRect from './Rect';
 
-const { width } = Dimensions.get('window');
+// const { width } = Dimensions.get( 'window' );
 
 export default class extends React.Component {
   constructor(props) {
     super(props);
-    let { width, height } = Dimensions.get('window');
-    console.log('test', width, width);
     this.state = {
       imageWidth: null,
       imageHeight: null,
       loaded: false,
-      editRectWidth: 200,
-      editRectHeight: 200,
+      editRectWidth: 350,
+      editRectHeight: 350,
       editRectRadius: 0,
       width: 1080,
       height: 1080,
       overlayColor: 'rgba(0, 0, 0, 0.5)',
-      source: ''
+      source: '',
+      scale: 0
     };
   }
 
-  matchDimesions(layout) {
+  matchViewDimensions(layout) {
     const { height } = layout;
     this.setState(
       {
@@ -40,9 +37,7 @@ export default class extends React.Component {
         editRectHeight: height
       },
       () => {
-        const { source, style } = this.props;
-        console.log('style');
-        console.log(style);
+        const { source } = this.props;
 
         Image.getSize(source.uri, (w, h) => {
           this.setState(
@@ -76,7 +71,7 @@ export default class extends React.Component {
     this.animatedTranslateY = new Animated.Value(this.translateY);
 
     // 缩放大小
-    this.scale = 1.2;
+    this.scale = 1;
     this.animatedScale = new Animated.Value(this.scale);
     this.lastZoomDistance = null;
     this.currentZoomDistance = 0;
@@ -102,15 +97,24 @@ export default class extends React.Component {
       onMoveShouldSetPanResponder: (evt, gestureState) => true,
       onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
       onPanResponderTerminationRequest: (evt, gestureState) => false,
+      onShouldBlockNativeResponder: (evt, gestureState) => true,
 
       onPanResponderGrant: (evt, gestureState) => {
         this.lastGestureDx = null;
         this.lastGestureDy = null;
         this.lastZoomDistance = null;
       },
+
       onPanResponderMove: (evt, gestureState) => {
         const { changedTouches } = evt.nativeEvent;
-        if (changedTouches.length <= 1) {
+        if (changedTouches.length <= 1 && this.scale === 1) {
+          console.log(this.scale);
+          console.log(gestureState.dx);
+          console.log(gestureState.dy);
+          console.log('last');
+          console.log(this.lastGestureDx);
+          console.log(this.lastGestureDy);
+
           this.translateX +=
             this.lastGestureDx === null
               ? 0
@@ -122,6 +126,25 @@ export default class extends React.Component {
           this.lastGestureDx = gestureState.dx;
           this.lastGestureDy = gestureState.dy;
           this.updateTranslate();
+        } else if (changedTouches.length <= 1 && this.scale > 1) {
+          console.log(this.scale);
+          console.log(gestureState.dx);
+          console.log(gestureState.dy);
+
+          console.log(gestureState.vx);
+          console.log(gestureState.vy);
+
+          this.translateX +=
+            this.lastGestureDx === null
+              ? 0
+              : gestureState.dx - this.lastGestureDx;
+          this.translateY +=
+            this.lastGestureDy === null
+              ? 0
+              : gestureState.dy - this.lastGestureDy;
+          this.lastGestureDx = gestureState.dx;
+          this.lastGestureDy = gestureState.dy;
+          this.updateTranslatezoom();
         } else {
           const widthDistance =
             changedTouches[1].pageX - changedTouches[0].pageX;
@@ -132,7 +155,6 @@ export default class extends React.Component {
               widthDistance * widthDistance + heightDistance * heightDistance
             )
           );
-
           if (this.lastZoomDistance !== null) {
             let scale =
               this.scale +
@@ -142,9 +164,15 @@ export default class extends React.Component {
             if (scale < 1) {
               scale = 1;
             }
+            if (scale > 1.3) {
+              scale = 1.3;
+            }
             this.animatedScale.setValue(scale);
             this.updateTranslate();
             this.scale = scale;
+            this.setState({
+              scale
+            });
           }
           this.lastZoomDistance = this.currentZoomDistance;
         }
@@ -155,6 +183,27 @@ export default class extends React.Component {
   }
 
   updateTranslate() {
+    const { editRectWidth, editRectHeight } = this.state;
+    const xOffest = (this.imageMinWidth - editRectWidth / 1.1 / this.scale) / 2;
+    const yOffest =
+      (this.imageMinHeight - editRectHeight / 1.1 / this.scale) / 2;
+
+    if (this.translateX > xOffest) {
+      this.translateX = xOffest;
+    }
+    if (this.translateX < -xOffest) {
+      this.translateX = -xOffest;
+    }
+    if (this.translateY > yOffest) {
+      this.translateY = yOffest;
+    }
+    if (this.translateY < -yOffest) {
+      this.translateY = -yOffest;
+    }
+    this.animatedTranslateX.setValue(this.translateX);
+    this.animatedTranslateY.setValue(this.translateY);
+  }
+  updateTranslatezoom() {
     const { editRectWidth, editRectHeight } = this.state;
     const xOffest = (this.imageMinWidth - editRectWidth / 1.1 / this.scale) / 2;
     const yOffest =
@@ -215,7 +264,7 @@ export default class extends React.Component {
     return (
       <View
         onLayout={event => {
-          this.matchDimesions(event.nativeEvent.layout);
+          this.matchViewDimensions(event.nativeEvent.layout);
         }}
       >
         {this.state.loaded && (
@@ -225,7 +274,7 @@ export default class extends React.Component {
           >
             <Animated.View style={animatedStyle}>
               <ImageBackground
-                resizeMode="cover"
+                resizeMode="contain"
                 style={{
                   width: this.imageMinWidth,
                   height: this.imageMinHeight
