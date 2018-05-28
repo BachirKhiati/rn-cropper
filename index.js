@@ -16,8 +16,30 @@ export default class extends React.Component {
       height: 1080,
       overlayColor: 'rgba(0, 0, 0, 0.5)',
       source: '',
-      scale: 0
+      scale: 1,
+      cropBorder: 1.1
     };
+  }
+
+
+  componentWillReceiveProps(nextProps) {
+    if(nextProps.source){
+      Image.getSize(nextProps.source.uri, (w, h) => {
+      this.setState(
+        {
+          imageWidth: w,
+          imageHeight: h,
+          source: nextProps.source
+        },
+        () => {
+          this.Loaded();
+          this.setState({
+            loaded: true
+          });
+        }
+      );
+    });
+    }
   }
 
   matchViewDimensions(layout) {
@@ -50,6 +72,7 @@ export default class extends React.Component {
   }
 
   Loaded() {
+
     const { editRectWidth, editRectHeight } = this.state;
     const { imageWidth, imageHeight } = this.state;
     this.lastGestureDx = null;
@@ -155,8 +178,8 @@ export default class extends React.Component {
             if (scale < 1) {
               scale = 1;
             }
-            if (scale > 1.6) {
-              scale = 1.6;
+            if (scale > 2) {
+              scale = 2;
             }
             this.animatedScale.setValue(scale);
             this.updateTranslate();
@@ -175,9 +198,9 @@ export default class extends React.Component {
 
   updateTranslate() {
     const { editRectWidth, editRectHeight } = this.state;
-    const xOffest = (this.imageMinWidth - editRectWidth / 1.1 / this.scale) / 2;
+    const xOffest = (this.imageMinWidth - editRectWidth / this.state.cropBorder / this.scale) / 2;
     const yOffest =
-      (this.imageMinHeight - editRectHeight / 1.1 / this.scale) / 2;
+      (this.imageMinHeight - editRectHeight / this.state.cropBorder / this.scale) / 2;
 
     if (this.translateX > xOffest) {
       this.translateX = xOffest;
@@ -196,9 +219,9 @@ export default class extends React.Component {
   }
   updateTranslatezoom() {
     const { editRectWidth, editRectHeight } = this.state;
-    const xOffest = (this.imageMinWidth - editRectWidth / 1.1 / this.scale) / 2;
+    const xOffest = (this.imageMinWidth - editRectWidth / this.state.cropBorder / this.scale) / 2;
     const yOffest =
-      (this.imageMinHeight - editRectHeight / 1.1 / this.scale) / 2;
+      (this.imageMinHeight - editRectHeight / this.state.cropBorder / this.scale) / 2;
 
     if (this.translateX > xOffest) {
       this.translateX = xOffest;
@@ -220,8 +243,8 @@ export default class extends React.Component {
     const { imageWidth, imageHeight } = this.state;
     const ratioX = imageWidth / this.imageMinWidth;
     const ratioY = imageHeight / this.imageMinHeight;
-    const width = editRectWidth / 1.1 / this.scale;
-    const height = editRectHeight / 1.1 / this.scale;
+    const width = editRectWidth / this.state.cropBorder / this.scale;
+    const height = editRectHeight / this.state.cropBorder / this.scale;
     const x = this.imageMinWidth / 2 - (width / 2 + this.translateX);
     const y = this.imageMinHeight / 2 - (height / 2 + this.translateY);
     return {
@@ -281,8 +304,8 @@ export default class extends React.Component {
                 <View style={{ flex: 1, backgroundColor: overlayColor }} />
                 <View
                   style={{
-                    width: editRectWidth / 1.1,
-                    height: editRectHeight / 1.1
+                    width: editRectWidth / this.state.cropBorder,
+                    height: editRectHeight / this.state.cropBorder
                   }}
                 >
                   <ClipRect
@@ -316,7 +339,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    overflow: 'hidden',
+    // overflow: 'hidden',
     backgroundColor: 'black'
   },
   editboxContainer: {
