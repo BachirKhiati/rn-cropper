@@ -206,8 +206,8 @@ export default class extends React.Component {
             if (scale < 1) {
               scale = 1;
             }
-            if (scale > 2) {
-              scale = 2;
+            if (scale >= 3) {
+              scale = 3;
             }
             this.animatedScale.setValue(scale);
             this.updateTranslate();
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    // overflow: 'hidden',
+    overflow: 'hidden',
     backgroundColor: 'black'
   },
   editboxContainer: {
