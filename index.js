@@ -121,43 +121,71 @@ export default class extends React.Component {
 
       onPanResponderMove: (evt, gestureState) => {
         const { changedTouches } = evt.nativeEvent;
-        if (changedTouches.length <= 1 && this.scale === 1) {
-          console.log(this.scale);
-          console.log(gestureState.dx);
-          console.log(gestureState.dy);
-          console.log('last');
-          console.log(this.lastGestureDx);
-          console.log(this.lastGestureDy);
-
+              if (changedTouches.length <= 1 && this.scale === 1) {
           this.translateX +=
             this.lastGestureDx === null
               ? 0
-              : gestureState.dx - this.lastGestureDx;
+              : gestureState.dx/2 - this.lastGestureDx;
           this.translateY +=
             this.lastGestureDy === null
               ? 0
-              : gestureState.dy - this.lastGestureDy;
-          this.lastGestureDx = gestureState.dx;
-          this.lastGestureDy = gestureState.dy;
+              : gestureState.dy/2 - this.lastGestureDy;
+          this.lastGestureDx = gestureState.dx/2;
+          this.lastGestureDy = gestureState.dy/2;
           this.updateTranslate();
         } else if (changedTouches.length <= 1 && this.scale > 1) {
-          console.log(this.scale);
-          console.log(gestureState.dx);
-          console.log(gestureState.dy);
-
-          console.log(gestureState.vx);
-          console.log(gestureState.vy);
-
-          this.translateX +=
-            this.lastGestureDx === null
-              ? 0
-              : gestureState.dx - this.lastGestureDx;
-          this.translateY +=
-            this.lastGestureDy === null
-              ? 0
-              : gestureState.dy - this.lastGestureDy;
-          this.lastGestureDx = gestureState.dx;
-          this.lastGestureDy = gestureState.dy;
+            if(this.scale > 1 && this.scale < 1.5){
+              let percentage = this.scale*2
+              this.translateX +=
+              this.lastGestureDx === null
+                ? 0
+                : gestureState.dx/percentage - this.lastGestureDx;
+            this.translateY +=
+              this.lastGestureDy === null
+                ? 0
+                : gestureState.dy/percentage - this.lastGestureDy;
+            this.lastGestureDx = gestureState.dx/percentage
+            this.lastGestureDy = gestureState.dy/percentage
+            }
+            if(this.scale > 1.5 && this.scale < 2){
+              let percentage = this.scale*3
+              this.translateX +=
+              this.lastGestureDx === null
+                ? 0
+                : gestureState.dx/percentage - this.lastGestureDx;
+            this.translateY +=
+              this.lastGestureDy === null
+                ? 0
+                : gestureState.dy/percentage - this.lastGestureDy;
+            this.lastGestureDx = gestureState.dx/percentage
+            this.lastGestureDy = gestureState.dy/percentage
+            }
+            if(this.scale > 2 && this.scale < 2.5){
+              let percentage = this.scale*4
+              this.translateX +=
+              this.lastGestureDx === null
+                ? 0
+                : gestureState.dx/percentage - this.lastGestureDx;
+            this.translateY +=
+              this.lastGestureDy === null
+                ? 0
+                : gestureState.dy/percentage - this.lastGestureDy;
+            this.lastGestureDx = gestureState.dx/percentage
+            this.lastGestureDy = gestureState.dy/percentage
+            }
+            if(this.scale > 2.5 && this.scale <= 3){
+              let percentage = this.scale*5
+              this.translateX +=
+              this.lastGestureDx === null
+                ? 0
+                : gestureState.dx/percentage - this.lastGestureDx;
+            this.translateY +=
+              this.lastGestureDy === null
+                ? 0
+                : gestureState.dy/percentage - this.lastGestureDy;
+            this.lastGestureDx = gestureState.dx/percentage
+            this.lastGestureDy = gestureState.dy/percentage
+            }
           this.updateTranslatezoom();
         } else {
           const widthDistance =
