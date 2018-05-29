@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, PanResponder, Animated, Image, StyleSheet } from 'react-native'
+import { View, PanResponder, Animated, Image, StyleSheet, ActivityIndicator } from 'react-native'
 import ClipRect from './Rect'
 
 export default class extends React.Component {
@@ -9,8 +9,8 @@ export default class extends React.Component {
       imageWidth: null,
       imageHeight: null,
       loaded: false,
-      editRectWidth: 350,
-      editRectHeight: 350,
+      editRectWidth: 0,
+      editRectHeight: 0,
       editRectRadius: 0,
       width: 1080,
       height: 1080,
@@ -22,6 +22,7 @@ export default class extends React.Component {
   }
 
   componentWillReceiveProps (nextProps) {
+    this.setState({loaded: false})
     if (nextProps.source) {
       Image.getSize(nextProps.source.uri, (w, h) => {
         this.setState(
@@ -43,6 +44,33 @@ export default class extends React.Component {
 
   matchViewDimensions (layout) {
     const { height } = layout
+    if( height===0 && height !==this.state.editRectWidth ){
+        this.setState(
+          {
+            editRectWidth: height,
+            editRectHeight: height
+          },
+          () => {
+            const { source } = this.props
+
+            Image.getSize(source.uri, (w, h) => {
+              this.setState(
+                {
+                  imageWidth: w,
+                  imageHeight: h,
+                  source: source
+                },
+                () => {
+                  this.Loaded()
+                  this.setState({
+                    loaded: true
+                  })
+                }
+              )
+            })
+          }
+        )
+    }
     this.setState(
       {
         editRectWidth: height,
@@ -257,7 +285,7 @@ export default class extends React.Component {
           this.matchViewDimensions(event.nativeEvent.layout)
         }}
       >
-        {this.state.loaded && (
+        {this.state.loaded ? (
           <View
             style={[styles.container, style]}
             {...this.imagePanResponder.panHandlers}
@@ -304,7 +332,11 @@ export default class extends React.Component {
               <View style={{ flex: 1, backgroundColor: overlayColor }} />
             </View>
           </View>
-        )}
+        ):<View style={styles.splash} >
+        <ActivityIndicator size='large' color={'#ade6ec'} />
+      </View> 
+        }
+
       </View>
     )
   }
@@ -336,5 +368,11 @@ const styles = StyleSheet.create({
   },
   editboxMiddle: {
     flexDirection: 'row'
-  }
+  },
+  splash: {
+    alignSelf: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    height: '100%',
+  },
 })
