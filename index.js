@@ -31,14 +31,12 @@ export default class extends React.Component {
             source: nextProps.source
           },
         () => {
-
-         
-
           this.Loaded()
-          setTimeout(function(){ this.setState({
-            loaded: true
-          })}.bind(this), 500);
-         
+          setTimeout(function () {
+            this.setState({
+              loaded: true
+            })
+          }.bind(this), 500)
         }
       )
       })
@@ -47,13 +45,13 @@ export default class extends React.Component {
 
   matchViewDimensions (layout) {
     const { height } = layout
-    if( height!==0 && height !==this.state.editRectWidth ){
-        this.setState(
-          {
-           loaded: false,
-            editRectWidth: height,
-            editRectHeight: height
-          },
+    if (height !== 0 && height !== this.state.editRectWidth) {
+      this.setState(
+        {
+          loaded: false,
+          editRectWidth: height,
+          editRectHeight: height
+        },
           () => {
             const { source } = this.props
 
@@ -66,17 +64,17 @@ export default class extends React.Component {
                 },
                 () => {
                   this.Loaded()
-                  setTimeout(function(){ this.setState({
-                    loaded: true
-                  })}.bind(this), 500);
-               
+                  setTimeout(function () {
+                    this.setState({
+                      loaded: true
+                    })
+                  }.bind(this), 500)
                 }
               )
             })
           }
         )
     }
-
   }
 
   Loaded () {
@@ -314,9 +312,9 @@ export default class extends React.Component {
               <View style={{ flex: 1, backgroundColor: overlayColor }} />
             </View>
           </View>
-        ):<View style={styles.splash} >
-        <ActivityIndicator size='large' color={'#ade6ec'} />
-      </View> 
+        ) : <View style={styles.splash} >
+          <ActivityIndicator size='large' color={'#ade6ec'} />
+        </View>
         }
 
       </View>
@@ -355,6 +353,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     justifyContent: 'center',
     width: '100%',
-    height: '100%',
-  },
+    height: '100%'
+  }
 })
