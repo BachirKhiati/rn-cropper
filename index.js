@@ -73,6 +73,7 @@ export default class extends React.Component {
   Loaded () {
     const { editRectWidth, editRectHeight } = this.state
     const { imageWidth, imageHeight } = this.state
+    let percentage = 2
     this.lastGestureDx = null
     this.translateX = 0
     this.animatedTranslateX = new Animated.Value(this.translateX)
@@ -123,26 +124,26 @@ export default class extends React.Component {
           this.translateX +=
             this.lastGestureDx === null
               ? 0
-              : gestureState.dx / 2 - this.lastGestureDx
+              : gestureState.dx / percentage - this.lastGestureDx
           this.translateY +=
             this.lastGestureDy === null
               ? 0
-              : gestureState.dy / 2 - this.lastGestureDy
-          this.lastGestureDx = gestureState.dx / 2
-          this.lastGestureDy = gestureState.dy / 2
+              : gestureState.dy / percentage - this.lastGestureDy
+          this.lastGestureDx = gestureState.dx / percentage
+          this.lastGestureDy = gestureState.dy / percentage
           this.updateTranslate()
         } else if (changedTouches.length <= 1 && this.scale > 1) {
           if (this.scale > 1 && this.scale < 1.5) {
-            let percentage = this.scale * 2
+            percentage = this.scale * 2
           }
           if (this.scale > 1.5 && this.scale < 2) {
-            let percentage = this.scale * 3
+            percentage = this.scale * 3
           }
           if (this.scale > 2 && this.scale < 2.5) {
-            let percentage = this.scale * 4
+            percentage = this.scale * 4
           }
           if (this.scale > 2.5 && this.scale <= 3) {
-            let percentage = this.scale * 4.5
+            percentage = this.scale * 4.5
           }
           this.translateX +=
               this.lastGestureDx === null
