@@ -1,7 +1,6 @@
 import React from 'react'
 import { View, PanResponder, Animated, Image, StyleSheet, ActivityIndicator } from 'react-native'
 import ClipRect from './Rect'
-
 export default class extends React.Component {
   constructor (props) {
     super(props)
@@ -32,10 +31,14 @@ export default class extends React.Component {
             source: nextProps.source
           },
         () => {
+
+         
+
           this.Loaded()
-          this.setState({
+          setTimeout(function(){ this.setState({
             loaded: true
-          })
+          })}.bind(this), 500);
+         
         }
       )
       })
@@ -44,9 +47,10 @@ export default class extends React.Component {
 
   matchViewDimensions (layout) {
     const { height } = layout
-    if( height===0 && height !==this.state.editRectWidth ){
+    if( height!==0 && height !==this.state.editRectWidth ){
         this.setState(
           {
+           loaded: false,
             editRectWidth: height,
             editRectHeight: height
           },
@@ -62,40 +66,17 @@ export default class extends React.Component {
                 },
                 () => {
                   this.Loaded()
-                  this.setState({
+                  setTimeout(function(){ this.setState({
                     loaded: true
-                  })
+                  })}.bind(this), 500);
+               
                 }
               )
             })
           }
         )
     }
-    this.setState(
-      {
-        editRectWidth: height,
-        editRectHeight: height
-      },
-      () => {
-        const { source } = this.props
 
-        Image.getSize(source.uri, (w, h) => {
-          this.setState(
-            {
-              imageWidth: w,
-              imageHeight: h,
-              source: source
-            },
-            () => {
-              this.Loaded()
-              this.setState({
-                loaded: true
-              })
-            }
-          )
-        })
-      }
-    )
   }
 
   Loaded () {
@@ -258,6 +239,7 @@ export default class extends React.Component {
     }
   }
   render () {
+    console.log(this.state)
     const animatedStyle = {
       transform: [
         {
