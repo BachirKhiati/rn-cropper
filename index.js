@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, PanResponder, Animated, Image, StyleSheet, ActivityIndicator } from 'react-native'
+import { View, PanResponder, Animated, Image, StyleSheet, ActivityIndicator,Platform } from 'react-native'
 import ClipRect from './Rect'
 export default class extends React.Component {
   constructor (props) {
@@ -26,8 +26,6 @@ export default class extends React.Component {
       if(this.state.loaded){
         this.setState({loaded: false})
       }
-      console.log('test 2');
-
       Image.getSize(nextProps.source.uri, (w, h) => {
         this.setState(
           {
@@ -61,14 +59,18 @@ export default class extends React.Component {
         this.setState({loaded: false})
       }
       if(type==='profile'){
-        editRectRadius=170
+        Platform.OS==='ios' ? editRectRadius=height/2.4 : editRectRadius=height/2.4
+        cropBorder=1.2
       }
-      if(type==='event'){
+      else{
         editRectRadius=0
+        cropBorder=1.1
       }
+
       Image.getSize(source.uri, (w, h) => {
         this.setState(
           {
+            cropBorder,
             imageWidth: w,
             imageHeight: h,
             source: source,
@@ -229,7 +231,6 @@ export default class extends React.Component {
     this.animatedTranslateY.setValue(this.translateY)
   }
   getCropData () {
-    console.log(this.state)
     const { editRectWidth, editRectHeight } = this.state
     const { imageWidth, imageHeight } = this.state
     const ratioX = imageWidth / this.imageMinWidth
@@ -295,15 +296,14 @@ export default class extends React.Component {
                 <View style={{ flex: 1, backgroundColor: overlayColor }} />
                       <View
                         style={{
-                       
                           width:( editRectWidth / this.state.cropBorder),
                           height: (editRectHeight / this.state.cropBorder)
                         }}
                       >
                             <ClipRect
                               style={{
-                                width:( editRectWidth / this.state.cropBorder) + 0.5,
-                                height: (editRectHeight / this.state.cropBorder)+ 0.1,
+                                width:( editRectWidth / this.state.cropBorder) ,
+                                height: (editRectHeight / this.state.cropBorder),
                                 borderRadius: editRectRadius,
                                 color: overlayColor
                               }}
@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
   editboxContainer: {
     position: 'absolute',
     top: 0,
-    right: -0.5,
+    right: 0,
     bottom: 0,
     left: 0,
   },
