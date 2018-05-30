@@ -8,21 +8,26 @@ export default class extends React.Component {
       imageWidth: null,
       imageHeight: null,
       loaded: false,
-      editRectWidth: 0,
-      editRectHeight: 0,
-      editRectRadius: 0,
+      editRectWidth: null,
+      editRectHeight: null,
+      editRectRadius: null,
       width: 1080,
       height: 1080,
       overlayColor: 'rgba(0, 0, 0, 0.5)',
-      source: '',
+      source: null,
       scale: 1,
       cropBorder: 1.1
     }
   }
 
   componentWillReceiveProps (nextProps) {
-    this.setState({loaded: false})
-    if (nextProps.source) {
+    if ((nextProps.source.uri && nextProps.source.uri !== this.state.source) 
+    && this.state.editRectWidth!==null ) {
+      if(this.state.loaded){
+        this.setState({loaded: false})
+      }
+      console.log('test 2');
+
       Image.getSize(nextProps.source.uri, (w, h) => {
         this.setState(
           {
@@ -31,12 +36,12 @@ export default class extends React.Component {
             source: nextProps.source
           },
         () => {
-          this.Loaded()
-          setTimeout(function () {
-            this.setState({
-              loaded: true
-            })
-          }.bind(this), 500)
+          this.panGesture()
+          setTimeout(function(){ this.setState({
+           loaded: true
+          })}.bind(this), 300);
+
+
         }
       )
       })
@@ -45,39 +50,39 @@ export default class extends React.Component {
 
   matchViewDimensions (layout) {
     const { height } = layout
-    if (height !== 0 && height !== this.state.editRectWidth) {
-      this.setState(
-        {
-          loaded: false,
-          editRectWidth: height,
-          editRectHeight: height
-        },
+    const { source } = this.props
+    if((height!==0 && 
+      height !==this.state.editRectWidth) 
+      && this.state.editRectWidth=== null
+      && this.state.source===null 
+     && this.state.source!==source.uri ){
+      if(this.state.loaded){
+        this.setState({loaded: false})
+      }
+      Image.getSize(source.uri, (w, h) => {
+        this.setState(
+          {
+            imageWidth: w,
+            imageHeight: h,
+            source: source,
+            editRectWidth: height,
+            editRectHeight: height
+          },
           () => {
-            const { source } = this.props
+            this.panGesture()
+            setTimeout(function(){ this.setState({
+              loaded: true
+            })}.bind(this), 300);
+         
 
-            Image.getSize(source.uri, (w, h) => {
-              this.setState(
-                {
-                  imageWidth: w,
-                  imageHeight: h,
-                  source: source
-                },
-                () => {
-                  this.Loaded()
-                  setTimeout(function () {
-                    this.setState({
-                      loaded: true
-                    })
-                  }.bind(this), 500)
-                }
-              )
-            })
           }
         )
+      })
     }
+
   }
 
-  Loaded () {
+  panGesture () {
     const { editRectWidth, editRectHeight } = this.state
     const { imageWidth, imageHeight } = this.state
     let percentage = 2
@@ -188,9 +193,7 @@ export default class extends React.Component {
             this.animatedScale.setValue(scale)
             this.updateTranslate()
             this.scale = scale
-            this.setState({
-              scale
-            })
+            this.setState({scale})
           }
           this.lastZoomDistance = this.currentZoomDistance
         }
@@ -222,6 +225,7 @@ export default class extends React.Component {
     this.animatedTranslateY.setValue(this.translateY)
   }
   getCropData () {
+    console.log(this.state)
     const { editRectWidth, editRectHeight } = this.state
     const { imageWidth, imageHeight } = this.state
     const ratioX = imageWidth / this.imageMinWidth
@@ -237,7 +241,6 @@ export default class extends React.Component {
     }
   }
   render () {
-    console.log(this.state)
     const animatedStyle = {
       transform: [
         {
@@ -312,9 +315,9 @@ export default class extends React.Component {
               <View style={{ flex: 1, backgroundColor: overlayColor }} />
             </View>
           </View>
-        ) : <View style={styles.splash} >
-          <ActivityIndicator size='large' color={'#ade6ec'} />
-        </View>
+        ):<View style={styles.splash} >
+        <ActivityIndicator size='large' color={'#ade6ec'} />
+      </View> 
         }
 
       </View>
@@ -353,6 +356,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     justifyContent: 'center',
     width: '100%',
-    height: '100%'
-  }
+    height: '100%',
+  },
 })
