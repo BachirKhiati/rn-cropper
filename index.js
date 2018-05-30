@@ -11,8 +11,8 @@ export default class extends React.Component {
       editRectWidth: null,
       editRectHeight: null,
       editRectRadius: null,
-      width: 1080,
-      height: 1080,
+      cropWidth: 1080,
+      cropHeight: 1080,
       overlayColor: 'rgba(0, 0, 0, 0.5)',
       source: null,
       scale: 1,
@@ -50,7 +50,8 @@ export default class extends React.Component {
 
   matchViewDimensions (layout) {
     const { height } = layout
-    const { source } = this.props
+    const { source, type, cropWidth, cropHeight } = this.props
+    
     if((height!==0 && 
       height !==this.state.editRectWidth) 
       && this.state.editRectWidth=== null
@@ -59,6 +60,12 @@ export default class extends React.Component {
       if(this.state.loaded){
         this.setState({loaded: false})
       }
+      if(type==='profile'){
+        editRectRadius=170
+      }
+      if(type==='event'){
+        editRectRadius=0
+      }
       Image.getSize(source.uri, (w, h) => {
         this.setState(
           {
@@ -66,20 +73,20 @@ export default class extends React.Component {
             imageHeight: h,
             source: source,
             editRectWidth: height,
-            editRectHeight: height
+            editRectHeight: height,
+            cropWidth,
+            cropHeight,
+            editRectRadius
           },
           () => {
             this.panGesture()
             setTimeout(function(){ this.setState({
               loaded: true
             })}.bind(this), 300);
-         
-
           }
         )
       })
     }
-
   }
 
   panGesture () {
@@ -90,18 +97,15 @@ export default class extends React.Component {
     this.translateX = 0
     this.animatedTranslateX = new Animated.Value(this.translateX)
 
-    // 上次/当前/动画 y 位移
     this.lastGestureDy = null
     this.translateY = 0
     this.animatedTranslateY = new Animated.Value(this.translateY)
 
-    // 缩放大小
     this.scale = 1
     this.animatedScale = new Animated.Value(this.scale)
     this.lastZoomDistance = null
     this.currentZoomDistance = 0
 
-    // 图片大小
     if (imageWidth < imageHeight) {
       this.imageMinWidth = editRectWidth
       this.imageMinHeight = imageHeight / imageWidth * editRectHeight
@@ -237,7 +241,7 @@ export default class extends React.Component {
     return {
       offset: { x: x * ratioX, y: y * ratioY },
       size: { width: width * ratioX, height: height * ratioY },
-      displaySize: { width: this.state.width, height: this.state.height }
+      displaySize: { width: this.state.cropWidth, height: this.state.cropHeight }
     }
   }
   render () {
@@ -289,28 +293,30 @@ export default class extends React.Component {
               <View style={{ flex: 1, backgroundColor: overlayColor }} />
               <View style={styles.editboxMiddle}>
                 <View style={{ flex: 1, backgroundColor: overlayColor }} />
-                <View
-                  style={{
-                    width: editRectWidth / this.state.cropBorder,
-                    height: editRectHeight / this.state.cropBorder
-                  }}
-                >
-                  <ClipRect
-                    style={{
-                      width: editRectWidth,
-                      height: editRectHeight,
-                      borderRadius: editRectRadius,
-                      color: overlayColor
-                    }}
-                  />
-                  <View
-                    style={[
-                      styles.clipRectBoder,
-                      { borderRadius: editRectRadius }
-                    ]}
-                  />
-                </View>
-                <View style={{ flex: 1, backgroundColor: overlayColor }} />
+                      <View
+                        style={{
+                       
+                          width:( editRectWidth / this.state.cropBorder),
+                          height: (editRectHeight / this.state.cropBorder)
+                        }}
+                      >
+                            <ClipRect
+                              style={{
+                                width:( editRectWidth / this.state.cropBorder) + 0.5,
+                                height: (editRectHeight / this.state.cropBorder)+ 0.1,
+                                borderRadius: editRectRadius,
+                                color: overlayColor
+                              }}
+                            />
+                            <View
+                              style={[
+                                styles.clipRectBoder,
+                                { borderRadius: editRectRadius }
+                              ]}
+                            />
+                    </View>
+
+                   <View style={{flex:1,backgroundColor: overlayColor }} />
               </View>
               <View style={{ flex: 1, backgroundColor: overlayColor }} />
             </View>
@@ -336,9 +342,9 @@ const styles = StyleSheet.create({
   editboxContainer: {
     position: 'absolute',
     top: 0,
-    right: 0,
+    right: -0.5,
     bottom: 0,
-    left: 0
+    left: 0,
   },
   clipRectBoder: {
     position: 'absolute',
@@ -348,9 +354,11 @@ const styles = StyleSheet.create({
     left: 0,
     borderColor: '#FFFFFF',
     borderWidth: 2
+    
   },
   editboxMiddle: {
-    flexDirection: 'row'
+    flexDirection: 'row',
+    
   },
   splash: {
     alignSelf: 'center',
